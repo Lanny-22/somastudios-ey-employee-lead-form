@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="EY Lead Form",
+    page_title="SOMA Studios, EY Employee Submission Form",
     page_icon="📋",
     layout="centered",
 )
@@ -22,12 +22,16 @@ st.markdown(
       iframe[title="streamlit_components_v1.components.html"] {
         background-color: #fcf1eb;
       }
+      [data-testid="stHeading"],
+      [data-testid="stHeadingWithAction"] h1 {
+        color: #10595f !important;
+      }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.title("EY Lead Form")
+st.title("SOMA Studios, EY Employee Submission Form")
 st.caption("Please use your EY work email (@mt.ey.com) to register.")
 
 FORM_HTML = """
