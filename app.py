@@ -15,10 +15,16 @@ FORM_HTML = """
 <html>
 <head>
   <style>
+    :root {
+      --momenceColorBackground: #fcf1eb;
+      --momenceColorPrimary: 16, 89, 95;
+      --momenceColorBlack: 3, 1, 13;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 0;
+      background: var(--momenceColorBackground);
     }
     #ey-email-error {
       display: none;
@@ -184,7 +190,7 @@ FORM_HTML = """
     source_id="221834"
     data_collect_consent="required"
     data-on-success-msg="Thank you! Please check your email for your exclusive unique one-time use discount code."
-    data-field-def='{"firstName":{"type":"text","label":"First name","required":true},"lastName":{"type":"text","label":"Last name","required":true},"email":{"type":"email","label":"Email (Work Email)","required":true,"hidden":false},"phoneNumber":{"type":"phone-number","label":"Phone number","required":true}}'
+    data-field-def='{"firstName":{"type":"text","label":"First name","required":true},"lastName":{"type":"text","label":"Last name","required":true},"email":{"type":"email","label":"Email","required":true},"phoneNumber":{"type":"phone-number","label":"Phone number","required":true}}'
     src="https://momence.com/plugin/lead-form/lead-form.js"
   ></script>
 </body>
