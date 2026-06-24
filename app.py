@@ -7,6 +7,26 @@ st.set_page_config(
     layout="centered",
 )
 
+st.markdown(
+    """
+    <style>
+      .stApp,
+      [data-testid="stAppViewContainer"],
+      [data-testid="stMain"],
+      [data-testid="block-container"],
+      [data-testid="stHeader"],
+      [data-testid="stBottom"],
+      [data-testid="stMainBlockContainer"] {
+        background-color: #fcf1eb !important;
+      }
+      iframe[title="streamlit_components_v1.components.html"] {
+        background-color: #fcf1eb;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("EY Lead Form")
 st.caption("Please use your EY work email (@mt.ey.com) to register.")
 
@@ -20,11 +40,15 @@ FORM_HTML = """
       --momenceColorPrimary: 16, 89, 95;
       --momenceColorBlack: 3, 1, 13;
     }
+    html {
+      background: #fcf1eb;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 0;
-      background: var(--momenceColorBackground);
+      background: #fcf1eb;
+      min-height: 100%;
     }
     #ey-email-error {
       display: none;
@@ -197,4 +221,4 @@ FORM_HTML = """
 </html>
 """
 
-components.html(FORM_HTML, height=720, scrolling=True)
+components.html(FORM_HTML, height=620, scrolling=False)
