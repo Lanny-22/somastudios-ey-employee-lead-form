@@ -2,13 +2,13 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="EY Work Email Form",
-    page_icon="📧",
+    page_title="EY Lead Form",
+    page_icon="📋",
     layout="centered",
 )
 
-st.title("EY Work Email")
-st.caption("Submit your EY work email address.")
+st.title("EY Lead Form")
+st.caption("Please use your EY work email (@mt.ey.com) to register.")
 
 FORM_HTML = """
 <!DOCTYPE html>
@@ -20,84 +20,166 @@ FORM_HTML = """
       margin: 0;
       padding: 0;
     }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-width: 420px;
-    }
-    label {
-      font-weight: 600;
-      font-size: 14px;
-      color: #31333f;
-    }
-    input[type="email"] {
-      padding: 10px 12px;
-      font-size: 16px;
-      border: 1px solid #d6d6d6;
-      border-radius: 8px;
-    }
-    input[type="email"]:focus {
-      outline: none;
-      border-color: #2e2e38;
-      box-shadow: 0 0 0 2px rgba(46, 46, 56, 0.15);
-    }
-    button {
-      padding: 10px 16px;
-      font-size: 16px;
-      font-weight: 600;
-      color: #ffffff;
-      background: #2e2e38;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      width: fit-content;
-    }
-    button:hover {
-      background: #1a1a22;
-    }
-    #success {
+    #ey-email-error {
       display: none;
-      color: #0d8050;
-      font-weight: 600;
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #fde8e8;
+      color: #9b1c1c;
       font-size: 14px;
-      margin: 0;
+      font-weight: 600;
     }
   </style>
-</head>
-<body>
-  <form id="eyForm">
-    <label for="email">Work Email</label>
-    <input
-      type="email"
-      id="email"
-      name="email"
-      placeholder="name@mt.ey.com"
-      required
-    />
-    <button type="submit">Submit</button>
-    <p id="success">Thank you! Your email has been submitted.</p>
-  </form>
-
   <script>
-    document.getElementById("eyForm").addEventListener("submit", function (e) {
-      const email = document.getElementById("email").value.trim();
-      const success = document.getElementById("success");
+    (function () {
+      const ALLOWED_DOMAIN = "@mt.ey.com";
+      const ERROR_MESSAGE =
+        "Please use your EY work email (" + ALLOWED_DOMAIN + ").";
 
-      if (!email.includes("@mt.ey.com")) {
-        e.preventDefault();
-        success.style.display = "none";
-        alert("Please use your EY work email (@mt.ey.com)");
-        return;
+      function isValidEyEmail(email) {
+        if (!email || typeof email !== "string") {
+          return false;
+        }
+        return /^[^\\s@]+@mt\\.ey\\.com$/i.test(email.trim());
       }
 
-      e.preventDefault();
-      success.style.display = "block";
-      document.getElementById("email").value = "";
-    });
+      function getEmailFromPayload(body) {
+        if (!body) {
+          return "";
+        }
+
+        if (typeof body === "string") {
+          try {
+            return getEmailFromPayload(JSON.parse(body));
+          } catch (error) {
+            return "";
+          }
+        }
+
+        if (typeof body === "object") {
+          return String(body.email || body.Email || "").trim();
+        }
+
+        return "";
+      }
+
+      function showError(message) {
+        const errorEl = document.getElementById("ey-email-error");
+        if (errorEl) {
+          errorEl.textContent = message;
+          errorEl.style.display = "block";
+        } else {
+          alert(message);
+        }
+      }
+
+      function hideError() {
+        const errorEl = document.getElementById("ey-email-error");
+        if (errorEl) {
+          errorEl.style.display = "none";
+          errorEl.textContent = "";
+        }
+      }
+
+      function rejectLeadSubmission(message) {
+        showError(message);
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              status: "fail",
+              error: message,
+            }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            }
+          )
+        );
+      }
+
+      function getEmailFromForm(form) {
+        if (!form) {
+          return "";
+        }
+
+        const emailInput =
+          form.querySelector('input[type="email"]') ||
+          form.querySelector('input[name="email"]') ||
+          form.querySelector('input[id*="email" i]');
+
+        return emailInput ? emailInput.value.trim() : "";
+      }
+
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = function (input, init) {
+        const url = typeof input === "string" ? input : input.url;
+
+        if (url && url.includes("/integrations/customer-leads/") && url.includes("/collect")) {
+          const email = getEmailFromPayload(init && init.body);
+          if (!isValidEyEmail(email)) {
+            return rejectLeadSubmission(ERROR_MESSAGE);
+          }
+        }
+
+        return originalFetch(input, init);
+      };
+
+      document.addEventListener(
+        "submit",
+        function (event) {
+          const email = getEmailFromForm(event.target);
+          if (!email) {
+            return;
+          }
+
+          if (!isValidEyEmail(email)) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            showError(ERROR_MESSAGE);
+          } else {
+            hideError();
+          }
+        },
+        true
+      );
+
+      document.addEventListener(
+        "input",
+        function (event) {
+          const target = event.target;
+          if (
+            target &&
+            (target.type === "email" ||
+              target.name === "email" ||
+              /email/i.test(target.id || ""))
+          ) {
+            hideError();
+          }
+        },
+        true
+      );
+    })();
   </script>
+</head>
+<body>
+  <p id="ey-email-error"></p>
+  <div id="momence-plugin-lead-form"></div>
+  <script
+    async
+    type="module"
+    id="momence-plugin-lead-form-src"
+    host_id="81008"
+    fields="firstName,lastName,email,phoneNumber"
+    token="DOjMdWLXQ5"
+    country_code="mt"
+    data_collect_consent="required"
+    data-field-def='{"firstName":{"type":"text","label":"First name","required":true},"lastName":{"type":"text","label":"Last name","required":true},"email":{"type":"email","label":"Email (Work Email)","required":true,"hidden":false},"phoneNumber":{"type":"phone-number","label":"Phone number","required":true}}'
+    src="https://momence.com/plugin/lead-form/lead-form.js"
+  ></script>
 </body>
 </html>
 """
 
-components.html(FORM_HTML, height=240, scrolling=False)
+components.html(FORM_HTML, height=720, scrolling=True)
