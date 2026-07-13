@@ -219,7 +219,7 @@ FORM_HTML = """
     country_code="mt"
     source_id="221834"
     data_collect_consent="required"
-    data-on-success-msg="Thank you! You will receive an email with instructions on how to download the platform Momence and add ‘SOMA Studios’ as a host."
+    data-on-success-msg="Thank you! You will receive an email with instructions on how to download the platform Momence and add ‘SOMA Studios’ as a host. Please also check your Promotions or Junk/Spam folder."
     data-field-def='{"firstName":{"type":"text","label":"First name","required":true},"lastName":{"type":"text","label":"Last name","required":true},"email":{"type":"email","label":"Email","required":true},"phoneNumber":{"type":"phone-number","label":"Phone number","required":true}}'
     src="https://momence.com/plugin/lead-form/lead-form.js"
   ></script>
